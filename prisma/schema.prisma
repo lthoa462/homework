@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  username      String        @unique
+  password      String
+  role          String        @default("student")
+  HomeworkReport HomeworkReport[]
+}
+
+model HomeworkReport {
+  id            Int           @id @default(autoincrement())
+  reportDate    DateTime      @db.Date
+  isImportant   Boolean       @default(false)
+  createdBy     Int
+  user          User          @relation(fields: [createdBy], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  SubjectEntry  SubjectEntry[]
+}
+
+model SubjectEntry {
+  id          Int           @id @default(autoincrement())
+  reportId    Int
+  report      HomeworkReport @relation(fields: [reportId], references: [id])
+  subjectName String        @db.VarChar(50)
+  content     String?       @db.Text
+  imageUrls   String[]
+  isHomework  Boolean       @default(false)
+}
+
+model Schedule {
+  id          Int           @id @default(autoincrement())
+  dayOfWeek   Int
+  subjectName String        @db.VarChar(50)
+  startTime   DateTime?     @db.Time
+  endTime     DateTime?     @db.Time
+}
