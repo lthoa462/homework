@@ -1,7 +1,6 @@
 // app/api/login/route.ts
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie'; // Thư viện giúp tạo chuỗi Cookie hợp lệ
 
