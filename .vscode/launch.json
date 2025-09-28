@@ -1,0 +1,58 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // 1. Debugging cho SERVER-SIDE Code (API Routes, getServerSideProps, Server Components, Middleware)
+    {
+      "name": "Next.js: Debug Server Side",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--inspect" // Kích hoạt Node.js inspector
+      },
+      "restart": true, // Tự động restart khi code thay đổi (hot reload)
+      "cwd": "${workspaceFolder}"
+    },
+    // 2. Debugging cho CLIENT-SIDE Code (Client Components, React Hooks, etc.)
+    {
+      "name": "Next.js: Debug Client Side",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000", // Đảm bảo trùng với cổng mà Next.js đang chạy
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome", // Tạo một profile Chrome riêng cho debug
+      "sourceMaps": true
+    },
+    // 3. Debugging FULL-STACK (SERVER và CLIENT cùng lúc)
+    {
+      "name": "Next.js: Full Stack Debug",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--inspect"
+      },
+      "cwd": "${workspaceFolder}",
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Next.js: Debug Client Side" // Khi server sẵn sàng, khởi động debug client
+      }
+    }
+  ]
+}

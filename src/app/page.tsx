@@ -6,6 +6,8 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { EventClickArg } from '@fullcalendar/core/index.js';
 
 export default function HomePage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -40,11 +42,27 @@ export default function HomePage() {
     router.push(`/report/${formattedDate}`);
   };
 
+
+    const handleEventClick = (info: EventClickArg) => {
+    // Hành vi khi click vào một sự kiện (ví dụ: "Có báo bài")
+    const clickedDate = info.event.startStr; // Lấy ngày của sự kiện đã click
+    router.push(`/report/${clickedDate}`);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <h1 className="text-3xl md:text-4xl font-bold text-center my-8 text-gray-800">
         Lịch Báo Bài
       </h1>
+      <Link href="/report-input" passHref legacyBehavior>
+          <button
+              className={`py-2 px-4 rounded-lg text-white font-semibold shadow-md transition duration-200 
+                  bg-indigo-600 hover:bg-indigo-700
+              `}
+          >
+              ➕ Nhập Báo Bài
+          </button>
+      </Link>
       {loading ? (
         <p className="text-center">Đang tải lịch...</p>
       ) : (
@@ -56,6 +74,7 @@ export default function HomePage() {
               initialView="dayGridMonth"
               events={events}
               dateClick={handleDateClick}
+              eventClick={handleEventClick}
               eventDidMount={(info) => {
                 info.el.style.backgroundColor = info.event.backgroundColor;
                 info.el.style.borderColor = info.event.borderColor;

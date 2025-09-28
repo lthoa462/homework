@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       data: {
         reportDate: new Date(reportDate),
         isImportant,
-        createdBy,
+        createdBy: 1,
         SubjectEntry: {
           create: subjectEntries.map(entry => ({
             subjectName: entry.subjectName,
