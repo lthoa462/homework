@@ -31,6 +31,7 @@ export function middleware(request: NextRequest) {
     verify(token, JWT_SECRET);
     return NextResponse.next();
   } catch (error) {
+    console.log(error)
     // Token không hợp lệ: Xóa token (nếu có) và chuyển hướng về trang đăng nhập
     const url = new URL('/login', request.url);
     const response = NextResponse.redirect(url);
