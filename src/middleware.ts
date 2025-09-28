@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 import { verify } from 'jsonwebtoken';
 
 // PHẢI GIỮ SECRET KEY NÀY NHẤT QUÁN VỚI API LOGIN!
-const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key_that_must_be_long'; 
+const JWT_SECRET = 'your_super_secret_key_that_must_be_long'; 
 
 export function middleware(request: NextRequest) {
   // Các đường dẫn cần bảo vệ

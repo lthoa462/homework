@@ -6,7 +6,7 @@ import { serialize } from 'cookie'; // Thư viện giúp tạo chuỗi Cookie h�
 
 // Cần cài đặt: npm install cookie
 // Thay thế bằng secret key mạnh mẽ của bạn
-const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key_that_must_be_long'; 
+const JWT_SECRET = 'your_super_secret_key_that_must_be_long'; 
 
 export async function POST(req: Request) {
   try {
