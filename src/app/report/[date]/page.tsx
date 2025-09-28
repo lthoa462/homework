@@ -7,11 +7,6 @@ import Image from 'next/image'; // Sử dụng Image component của Next.js
 
 // --- Định nghĩa Types (Interfaces) ---
 
-interface ReportPageProps {
-  params: {
-    date: string; 
-  };
-}
 
 interface SubjectEntry {
   subjectName: string;
@@ -28,7 +23,7 @@ interface HomeworkReport {
 
 // --- Component chính ---
 
-export default function ReportPage({ params }: ReportPageProps) {
+export default function  ReportPage({ params }: { params: Promise<{ date: string }> }) {
   const [reports, setReports] = useState<HomeworkReport[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,12 +31,17 @@ export default function ReportPage({ params }: ReportPageProps) {
   // State để quản lý ảnh được click và hiển thị trong modal
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [displayDate, setDisplayDate] = useState<string|null>("")
 
   useEffect(() => {
-    const dateToFetch = params.date.split('T')[0]; 
+
 
     async function fetchReports() {
       try {
+        const param = await params;
+        
+        const dateToFetch = param.date.split('T')[0]; 
+        setDisplayDate(dateToFetch);
         const response = await fetch(`/api/reports/${dateToFetch}`);
         
         if (response.ok) {
@@ -73,7 +73,7 @@ export default function ReportPage({ params }: ReportPageProps) {
       }
     }
     fetchReports();
-  }, [params.date]); 
+  }, [params]); 
 
   // Hàm xử lý khi click vào ảnh nhỏ
   const handleImageClick = (imageUrl: string) => {
@@ -82,12 +82,10 @@ export default function ReportPage({ params }: ReportPageProps) {
   };
 
   // Hàm đóng modal
-  const handleCloseModal = () => {
+  const  handleCloseModal = async () => {
     setModalOpen(false);
     setSelectedImage(null);
   };
-
-  const displayDate = params.date.split('T')[0]; 
 
   if (loading) {
     return (

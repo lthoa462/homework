@@ -1,6 +1,6 @@
 // app/api/upload-s3/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ObjectCannedACL } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { verify } from 'jsonwebtoken';
 
@@ -29,7 +29,7 @@ const uploadFileToS3 = async (file: Buffer, fileName: string, fileType: string):
     Body: file,
     ContentType: fileType,
     // Ví dụ: Nếu bạn muốn ảnh có thể truy cập công khai qua URL
-     ACL: "public-read",
+    ACL: ObjectCannedACL.public_read,
   };
 
   const command = new PutObjectCommand(params);
