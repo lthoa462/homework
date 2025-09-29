@@ -32,9 +32,6 @@ export async function POST(req: Request) {
     
     // So sánh mật khẩu (Giả định mật khẩu đã được hash)
     const isPasswordValid = password == user.password
-    console.log("🚀 ~ POST ~ password:", password)
-    console.log(user);
-    console.log(username);
     
     if (!isPasswordValid) {
       return NextResponse.json(
@@ -59,15 +56,15 @@ export async function POST(req: Request) {
       path: '/', // Áp dụng cho toàn bộ domain
     });
 
-    // 3. Trả về phản hồi và thiết lập Cookie
-    const response = NextResponse.json(
-      { message: 'Đăng nhập thành công.' }, 
-      { status: 200 }
-    );
-    
+    // 3. Trả về phản hồi CHUYỂN HƯỚNG và thiết lập Cookie
+    const redirectUrl = new URL('/report-input', req.url); // Khởi tạo URL chuyển hướng
+
+    // 🎯 DÙNG 302 FOUND để buộc trình duyệt thực hiện request GET MỚI 🎯
+    const response = NextResponse.redirect(redirectUrl, { status: 302 }); 
+
     // Gán Cookie vào header của response
     response.headers.set('Set-Cookie', serializedCookie);
-    
+
     return response;
 
   } catch (error) {

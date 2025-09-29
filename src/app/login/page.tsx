@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import HomeButton from '@/components/HomeButton';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -29,14 +30,17 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
 
-      const data = await response.json();
+      if (response.redirected) {
+        window.location.href = response.url;
+        return
+      }
 
       if (response.ok) {
-        // Cookie đã được thiết lập bởi response header của API.
-        // Chỉ cần chuyển hướng client.
-        router.push(REDIRECT_PATH); 
+        // Đăng nhập thành công, chuyển hướng về trang nhập liệu
+        router.push(REDIRECT_PATH);
       } else {
-        setError(data.message || 'Đăng nhập thất bại.');
+        const data = await response.json();
+        setError(data.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('Login failed:', err);
@@ -52,6 +56,7 @@ export default function LoginPage() {
         <h2 className="text-3xl font-bold text-center text-gray-900">
           Đăng Nhập Hệ Thống
         </h2>
+        <HomeButton />
         {error && (
           <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg">
             {error}

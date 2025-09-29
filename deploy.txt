@@ -1,0 +1,21 @@
+cd ~/my-nextjs-app/homework
+
+# Dừng ứng dụng
+pm2 stop nextjs-app
+
+# Lấy code mới
+git checkout <tên_branch_mới>
+git pull origin <tên_branch_mới>
+
+# Cài đặt và build
+npm install
+npx prisma generate
+dotenv -f .env.production -- npx prisma migrate deploy
+npm run build
+
+# Khởi động lại ứng dụng
+pm2 restart nextjs-app
+pm2 save
+
+# (Tùy chọn) Khởi động lại Nginx nếu config thay đổi
+# sudo systemctl restart nginx

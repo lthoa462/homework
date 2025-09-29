@@ -8,7 +8,7 @@ const JWT_SECRET = 'your_super_secret_key_that_must_be_long';
 
 export function middleware(request: NextRequest) {
   // Các đường dẫn cần bảo vệ
-  const protectedRoutes = ['/report-input', '/api/reports/create']; 
+  const protectedRoutes = ['/report-input', '/api/reports/create', '/api/upload-s3']; 
   const isProtectedRoute = protectedRoutes.some(route => 
     request.nextUrl.pathname.startsWith(route)
   );
@@ -43,6 +43,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // Áp dụng cho trang nhập liệu và API tạo báo cáo
-  matcher: ['/report-input/:path*', '/api/reports/create'],
+  matcher: ['/report-input/:path*', '/api/reports/create', '/api/upload-s3'],
    runtime: 'nodejs', 
 };
