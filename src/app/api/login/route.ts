@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sign } from 'jsonwebtoken';
 import { serialize } from 'cookie'; // Thư viện giúp tạo chuỗi Cookie hợp lệ
+import { compare } from 'bcryptjs';
 
 // Cần cài đặt: npm install cookie
 // Thay thế bằng secret key mạnh mẽ của bạn
@@ -21,6 +22,12 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { username },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        status: true,
+      },
     });
 
     if (!user) {
@@ -30,8 +37,15 @@ export async function POST(req: Request) {
       );
     }
     
-    // So sánh mật khẩu (Giả định mật khẩu đã được hash)
-    const isPasswordValid = password == user.password
+    if (user.status !== 'active') {
+      return NextResponse.json(
+        { message: 'Tài khoản đã bị tạm khóa. Vui lòng liên hệ quản trị viên.' },
+        { status: 403 }
+      );
+    }
+
+    // So sánh mật khẩu đã được hash
+    const isPasswordValid = await compare(password, user.password);
     
     if (!isPasswordValid) {
       return NextResponse.json(
