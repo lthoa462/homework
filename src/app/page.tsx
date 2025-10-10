@@ -22,10 +22,11 @@ export default function HomePage() {
         if (response.ok) {
           const data = await response.json();
           const formattedEvents = data.map((report: any) => ({
-            title: 'Có báo bài',
+            title: report.isImportant ? 'Báo bài quan trọng' : 'Có báo bài',
             date: report.reportDate.split('T')[0],
-            backgroundColor: 'green',
-            borderColor: 'green'
+            backgroundColor: report.isImportant ? '#dc2626' : '#16a34a',
+            borderColor: report.isImportant ? '#dc2626' : '#16a34a',
+            textColor: '#ffffff'
           }));
           setEvents(formattedEvents);
         }
@@ -42,9 +43,7 @@ export default function HomePage() {
     const formattedDate = info.dateStr;
     router.push(`/report/${formattedDate}`);
   };
-
-
-    const handleEventClick = (info: EventClickArg) => {
+  const handleEventClick = (info: EventClickArg) => {
     // Hành vi khi click vào một sự kiện (ví dụ: "Có báo bài")
     const clickedDate = info.event.startStr; // Lấy ngày của sự kiện đã click
     router.push(`/report/${clickedDate}`);
@@ -55,15 +54,44 @@ export default function HomePage() {
       <h1 className="text-3xl md:text-4xl font-bold text-center my-8 text-gray-800">
         Lịch Báo Bài
       </h1>
-      <Link href="/report-input" passHref legacyBehavior>
+      <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
+        <Link href="/report-input" passHref legacyBehavior>
           <button
-              className={`py-2 px-4 rounded-lg text-white font-semibold shadow-md transition duration-200 
+            className={`py-2 px-4 rounded-lg text-white font-semibold shadow-md transition duration-200
                   bg-indigo-600 hover:bg-indigo-700
               `}
           >
-              ➕ Nhập Báo Bài
+            ➕ Nhập Báo Bài
           </button>
-      </Link>
+        </Link>
+      </div>
+      <div className="mx-auto mt-4 w-full max-w-2xl px-4 md:max-w-3xl">
+        <div className="flex flex-col gap-3 rounded-2xl border border-indigo-100 bg-white/90 p-4 text-sm text-gray-700 shadow-md md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2 md:max-w-sm">
+            <h2 className="text-base font-semibold text-gray-900">Giải thích ký hiệu lịch</h2>
+            <p>
+              Lịch sử dụng màu sắc để giúp bạn biết nhanh trạng thái của từng ngày báo bài.
+              Những ngày không hiển thị nghĩa là chưa có báo bài được giao.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-6">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+              <span className="inline-flex h-3 w-3 rounded-full bg-[#16a34a]" aria-hidden />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Có báo bài</p>
+                <p className="text-xs text-gray-600">Ngày có báo bài thông thường.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+              <span className="inline-flex h-3 w-3 rounded-full bg-[#dc2626]" aria-hidden />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Báo bài quan trọng</p>
+                <p className="text-xs text-gray-600">Ngày cần ưu tiên hoặc nội dung quan trọng.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {loading ? (
         <p className="text-center">Đang tải lịch...</p>
       ) : (
@@ -79,7 +107,7 @@ export default function HomePage() {
               eventDidMount={(info) => {
                 info.el.style.backgroundColor = info.event.backgroundColor;
                 info.el.style.borderColor = info.event.borderColor;
-                info.el.style.color = 'white';
+                info.el.style.color = info.event.textColor || 'white';
               }}
               height="auto"
               contentHeight="auto"
