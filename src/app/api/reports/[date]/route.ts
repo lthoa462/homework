@@ -1,40 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { buildUtcDateRange, normalizeToUtcDate } from "@/lib/date";
 
 export async function GET(
-  req: NextRequest,
-    { params }: { params: Promise<{ date: string }> }
+  _request: NextRequest,
+  { params }: { params: { date: string } },
 ) {
-  const {date} = await params;
+  const { date } = params;
 
   if (!date) {
-    return NextResponse.json({ error: 'Date is required' }, { status: 400 });
+    return NextResponse.json({ error: "Date is required" }, { status: 400 });
   }
 
-  const reportDate = new Date(date);
-  const startOfDay = new Date(reportDate);
-  startOfDay.setHours(0, 0, 0, 0);
+  const normalizedDate = normalizeToUtcDate(date);
+  if (!normalizedDate) {
+    return NextResponse.json({ error: "Invalid date provided" }, { status: 400 });
+  }
 
-  const endOfDay = new Date(reportDate);
-  endOfDay.setHours(23, 59, 59, 999);
+  const { start, end } = buildUtcDateRange(normalizedDate);
 
   try {
     const report = await prisma.homeworkReport.findMany({
       where: {
         reportDate: {
-          gte: startOfDay,
-          lte: endOfDay,
+          gte: start,
+          lt: end,
         },
       },
       include: {
         SubjectEntry: true,
       },
+      orderBy: { id: "asc" },
     });
 
     if (report.length === 0) {
       return NextResponse.json(
-        { error: 'Report not found for this date' },
-        { status: 404 }
+        { error: "Report not found for this date" },
+        { status: 404 },
       );
     }
 
@@ -42,8 +44,8 @@ export async function GET(
   } catch (error) {
     console.error("Error fetching report:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch report' },
-      { status: 500 }
+      { error: "Failed to fetch report" },
+      { status: 500 },
     );
   }
 }
