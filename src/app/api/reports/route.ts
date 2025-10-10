@@ -1,32 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/reports/route.ts
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { SubjectEntry } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { SubjectEntry } from "@prisma/client";
+import { normalizeToUtcDate } from "@/lib/date";
 
 type ReportInput = {
   reportDate: string;
   isImportant: boolean;
-  subjectEntries: Omit<SubjectEntry, 'id' | 'reportId'>[];
-  createdBy: number;
+  subjectEntries: Omit<SubjectEntry, "id" | "reportId">[];
+  createdBy?: number;
 };
 
 // API POST: Tạo báo bài mới
 export async function POST(request: Request) {
   try {
-    const { reportDate, isImportant, subjectEntries, createdBy } = (await request.json()) as ReportInput;
+    const { reportDate, isImportant, subjectEntries, createdBy } =
+      (await request.json()) as ReportInput;
+
+    const normalizedReportDate = normalizeToUtcDate(reportDate);
+    if (!normalizedReportDate) {
+      return NextResponse.json({ error: "Invalid report date" }, { status: 400 });
+    }
 
     const newReport = await prisma.homeworkReport.create({
       data: {
-        reportDate: new Date(reportDate),
+        reportDate: normalizedReportDate,
         isImportant,
-        createdBy: 1,
+        createdBy: createdBy ?? 1,
         SubjectEntry: {
-          create: subjectEntries.map(entry => ({
+          create: subjectEntries.map((entry) => ({
             subjectName: entry.subjectName,
             content: entry.content,
             imageUrls: entry.imageUrls || [],
-            isHomework: entry.isHomework
+            isHomework: entry.isHomework ?? false,
           })),
         },
       },
@@ -38,7 +45,7 @@ export async function POST(request: Request) {
     return NextResponse.json(newReport, { status: 201 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to create report' }, { status: 500 });
+    return NextResponse.json({ error: "Failed to create report" }, { status: 500 });
   }
 }
 
@@ -54,7 +61,7 @@ export async function PUT(request: Request) {
     });
 
     if (!oldReport) {
-      return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
     }
 
     // Xóa các SubjectEntry cũ liên quan đến báo bài này
@@ -72,7 +79,7 @@ export async function PUT(request: Request) {
             subjectName: entry.subjectName,
             content: entry.content,
             imageUrls: entry.imageUrls || [],
-            isHomework: entry.isHomework,
+            isHomework: entry.isHomework ?? false,
           })),
         },
       },
@@ -84,7 +91,7 @@ export async function PUT(request: Request) {
     return NextResponse.json(updatedReport, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to update report' }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update report" }, { status: 500 });
   }
 }
 
@@ -94,12 +101,13 @@ export async function GET() {
     const reports = await prisma.homeworkReport.findMany({
       select: {
         reportDate: true,
-        isImportant: true // Lấy thêm trường này để phân biệt ngày quan trọng
+        isImportant: true, // Lấy thêm trường này để phân biệt ngày quan trọng
       },
+      orderBy: { reportDate: "asc" },
     });
 
-    const formattedReports = reports.map(report => ({
-      reportDate: report.reportDate,
+    const formattedReports = reports.map((report) => ({
+      reportDate: report.reportDate.toISOString().split("T")[0],
       isImportant: report.isImportant,
       // Thêm các trường khác cần thiết
     }));
@@ -107,6 +115,6 @@ export async function GET() {
     return NextResponse.json(formattedReports);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch report dates' }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch report dates" }, { status: 500 });
   }
 }
